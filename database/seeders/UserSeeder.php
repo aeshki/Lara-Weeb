@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
                 'username' => 'admin',
                 'pseudo' => 'Super Admin',
                 'email' => 'admin@laraweeb.com',
+                'banner_color' => '#000000'
             ]);
 
         User::factory(20)->create();

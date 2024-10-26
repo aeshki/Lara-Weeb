@@ -21,7 +21,7 @@ const wallpaper = reactive({
 </script>
 
 <template>
-    <main class='relative bg-zinc-100 min-h-full flex justify-center mobile:items-center'>
+    <main class='relative min-h-full flex justify-center mobile:items-center'>
         <RouterView />
         <div
             class='hidden absolute top-0 left-0 h-full w-full brightness-[.8] mobile:block'
