@@ -10,7 +10,12 @@ const AllWallpapers = [
     'https://images7.alphacoders.com/325/thumb-1920-325547.jpg',
     'https://images6.alphacoders.com/130/thumb-1920-1308016.jpg',
     'https://images2.alphacoders.com/122/thumb-1920-1225585.jpg',
-    'https://images4.alphacoders.com/972/thumb-1920-972949.jpg'
+    'https://images4.alphacoders.com/972/thumb-1920-972949.jpg',
+    'https://images5.alphacoders.com/131/thumb-1920-1311994.jpeg',
+    'https://images5.alphacoders.com/135/thumb-1920-1354556.png',
+    'https://images3.alphacoders.com/133/thumb-1920-1337364.png',
+    'https://images7.alphacoders.com/134/thumb-1920-1344447.png',
+    'https://images4.alphacoders.com/819/thumb-1920-819837.png'
 ];
 
 const wallpaper = reactive({
