@@ -28,6 +28,7 @@ return new class extends Migration
 
             $table->boolean('logged_today')->default(false);
             $table->integer('login_streak')->default(0);
+            $table->integer('better_login_streak')->default(0);
 
             $table->string('email')->unique();
 

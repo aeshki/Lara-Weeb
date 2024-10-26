@@ -38,6 +38,6 @@ class CommentPolicy
 
     public function delete(User $user, Comment $model)
     {
-        return $user->id === $model->id;
+        return $user->id === $model->user_id;
     }
 }

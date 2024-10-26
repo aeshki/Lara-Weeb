@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, shallowRef } from 'vue';
+import { ref, computed, shallowRef, onBeforeMount, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import useAxios from '@/utils/useAxios';
@@ -51,8 +51,29 @@ const handlePostLiked = (postId) => {
 const handlePostUnliked = (postId) => {
   totalLikes.value--;
 };
-</script>
 
+const toggleFollowState = () => {
+  if (user.value.is_followed) {
+    const { onFulfilled } = useAxios(`/api/users/${user.value.id}/unfollow`, { method: 'DELETE' });
+
+    onFulfilled(() => {
+      user.value.followers_count--;
+      user.value.is_followed = false;
+    });
+  } else {
+    const { onFulfilled } = useAxios(`/api/users/${user.value.id}/follow`, { method: 'POST' });
+
+    onFulfilled(() => {
+      if (user.value.is_private) {
+        user.value.pending = true;
+      } else {
+        user.value.followers_count++
+        user.value.is_followed = true;
+      }
+    });
+  }
+};
+</script>
 <template>
   <main>
     <HeaderNav :title='!loading && canEditProfile ? "Mon profil" : user.is_private ? "Compte privé" : "Compte"' class='sticky top-0 backdrop-blur-lg bg-zinc-900/80' />  
@@ -74,12 +95,21 @@ const handlePostUnliked = (postId) => {
           class='absolute -bottom-10 left-8 w-24 h-24 sm:w-36 sm:h-36 sm:-bottom-16'
         />
         
-        <RoundedButton
-          v-if='!loading && canEditProfile'
-          class='absolute right-4 mt-3'
-          to='/settings'
-          text='Éditer le profil'
-        />
+        <div class='absolute right-4 mt-3 flex flex-col items-end gap-2'>
+          <RoundedButton
+            v-if='!loading && canEditProfile'     
+            to='/settings'
+            text='Éditer le profil'
+          />
+
+          <RoundedButton
+            v-if='!loading && !canEditProfile'
+            :variant='user.is_followed && "fill-red"'
+            :disabled='user.pending'
+            :text="user.is_followed ? 'Se désabonner' : user.is_private && !user.pending ? 'Envoyer une invitation' : user.pending ? 'Invitation envoyé' : 'S’abonner'"
+            @click='!user.pending && toggleFollowState()'
+          />
+        </div>
       </div>
     </div>
     <!-- CONTENT -->
@@ -133,18 +163,22 @@ const handlePostUnliked = (postId) => {
         </template>
       </div>
       <!-- STATS -->
-      <div class='mt-1'>
-        <div
-          v-if='!loading'
-          class='flex gap-2 *:font-bold *:text-base'
-        >
-          <p>{{ totalLikes }} <span class='text-neutral-300 text-sm font-normal'>Likes</span></p>
-          <p v-if='user.login_streak'>{{ user.login_streak }} <span class='text-neutral-300 text-sm font-normal'>Jours d'activité</span></p>
-        </div>
+      <div class='mt-0.5'>
+        <template v-if='!loading'>
+          <div class='flex flex-wrap gap-2 *:font-bold *:text-base'>
+            <p>{{ user.followers_count }} <span class='text-neutral-300 text-sm font-normal'>followers</span></p>
+            <p>{{ user.following_count }} <span class='text-neutral-300 text-sm font-normal'>suivis</span></p>
+          </div>
+          <div class='flex flex-wrap gap-2 *:font-bold *:text-base'>
+            <p v-if='!user.is_private'>{{ totalLikes }} <span class='text-neutral-300 text-sm font-normal'>Likes</span></p>
+            <p v-if='user.login_streak'>{{ user.login_streak }} <span class='text-neutral-300 text-sm font-normal'>Jours d'activité</span></p>
+            <p v-if='user.better_login_streak > user.login_streak'>{{ user.better_login_streak }} <span class='text-neutral-300 text-sm font-normal'>Jours d'activité ( meilleur série )</span></p>
+          </div>
+        </template>
       </div>
     </div>
     <!-- TABS -->
-    <template v-if='!loading && (!user.is_private || canEditProfile)'>
+    <template v-if='!loading && ((!user.is_private || user.is_followed) || canEditProfile)'>
       <div class='flex *:w-full *:text-center *:py-3 *:border-b *:text-neutral-400 has-[:checked]:*:text-neutral-100 has-[:checked]:*:border-b-white *:border-b-zinc-700'>
         <label>
           <input
@@ -171,7 +205,7 @@ const handlePostUnliked = (postId) => {
         </label>
       </div>
 
-      <KeepAlive class='p-4 h-full'>
+      <KeepAlive class='p-4 h-fit'>
         <component
           :is='current_tab'
           @postLiked='handlePostLiked'
@@ -179,8 +213,14 @@ const handlePostUnliked = (postId) => {
         />
       </KeepAlive>
     </template>
-    <template v-else-if='!loading'>
-      <p>Ce profil est privé</p>
-    </template>
+    <div
+      v-else-if='!loading'
+      class='flex flex-col gap-3 pt-4 items-center justify-center'
+    >
+      <div class='border-2 p-4 rounded-full'>
+        <Lock size='48' strokeWidth='1' />
+      </div>
+      <p class='text-lg'>Ce compte est privé</p>
+    </div>
   </main>
 </template>

@@ -20,6 +20,8 @@ class UserSeeder extends Seeder
                 'email' => 'admin@laraweeb.com',
             ]);
 
+        User::factory(20)->create();
+
         /**
          * Create users between MIN_NUMBER_FAKE_USERS and MAX_NUMBER_FAKE_USERS or NUMBER_FAKE_USERS
          * if MIN_NUMBER_FAKE_USERS and MAX_NUMBER_FAKE_USERS are undefined.

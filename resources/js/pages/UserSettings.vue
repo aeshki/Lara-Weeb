@@ -124,7 +124,11 @@ const handleDeleteAccount = () => {
   }
 };
 
-onFulfilled((data) => router.push(`/@${data.value.user.username}`));
+onFulfilled((data) => {
+  router.push(`/@${data.value.user.username}`).then(() => {
+    location.reload();
+  });
+});
 </script>
 
 <template>

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificationCreated;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 
 use App\Models\Comment;
+use App\Models\Notification;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +36,9 @@ class CommentController extends Controller
 
     public function store(StoreCommentRequest $req)
     {
-        if (!Post::find($req->post_id)) {
+        $post = Post::find($req->post_id);
+
+        if (!$post) {
             return response()->json([
                 'error' => 'Post not found.'
             ], 404);
@@ -44,6 +48,18 @@ class CommentController extends Controller
             ...$req->validated(),
             'user_id' => Auth::id(),
         ]);
+
+        if (Auth::id() != $post->author->id) {
+            $notification = Notification::create([
+                'type' => 'replied',
+                'author_id' => Auth::id(),
+                'recipient_id' => $post->author->id,
+                'notifiable_id' => $post->id,
+                'notifiable_type' => Post::class
+            ]);
+    
+            broadcast(new NotificationCreated($notification))->toOthers();    
+        }
 
         return response()->json([
             'message' => 'Comment created succesfully.',

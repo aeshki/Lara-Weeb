@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\User;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Console\Command;
 
 class ResetLoginStreaks extends Command
 {
@@ -18,6 +16,10 @@ class ResetLoginStreaks extends Command
 
         foreach ($users as $user) {
             if (!$user->logged_today) {
+                if (($user->login_streak > $user->better_login_streak) && $user->login_streak > 1) {
+                    $user->better_login_streak = $user->login_streak;
+                }
+
                 $user->login_streak = 0;
             } else {
                 $user->logged_today = false;

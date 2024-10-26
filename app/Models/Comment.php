@@ -31,4 +31,9 @@ class Comment extends Model
     {
         return $this->belongsToMany(Post::class);
     }
+
+    public function notifications()
+    {
+        return $this->morphMany(Notification::class, 'notifiable');
+    }
 }

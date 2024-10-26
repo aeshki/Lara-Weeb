@@ -13,6 +13,7 @@ class Post extends Model
     protected $fillable = [
         'message',
         'image',
+        'visible',
         'user_id',
     ];
 
@@ -26,6 +27,13 @@ class Post extends Model
         'likes_count'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'visible' => 'boolean'
+        ];
+    }
+
     protected function getIsLikedAttribute()
     {
         return $this->likes()->where('user_id', auth()->id())->exists();
@@ -36,11 +44,15 @@ class Post extends Model
         return $this->likes()->count();
     }
 
-    public function scopePublic(Builder $query): void
+    public function scopePublic(Builder $query, User $currentUser): void
     {
-        $query->whereHas('author', function($query) {
-            $query->where('is_private', false);
-        });
+        $query->where('visible', true)
+              ->whereHas('author', function($authorQuery) use ($currentUser) {
+                  $authorQuery->where('is_private', false)
+                              ->orWhereHas('followers', function($followerQuery) use ($currentUser) {
+                                  $followerQuery->where('follower_id', $currentUser->id);
+                              });
+              });
     }
 
     public function author()

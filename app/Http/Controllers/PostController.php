@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificationCreated;
 use App\Http\Helpers\ImageManager;
 use App\Http\Requests\StorePostRequest;
 use App\Models\Post;
 use App\Http\Requests\UpdatePostRequest;
+use App\Models\Notification;
 use App\Models\Tag;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +20,7 @@ class PostController extends Controller
 
     public function index(Request $request)
     {        
-        $query = Post::public()->with('author');
+        $query = Post::public(Auth::user())->with('author');
         
         if ($request->has('tag')) {
             $tagName = $request->query('tag');
@@ -37,7 +39,6 @@ class PostController extends Controller
             'posts' => $posts
         ]);
     }
-    
 
     public function show(Post $post)
     {
@@ -82,6 +83,18 @@ class PostController extends Controller
         }
 
         DB::commit();
+
+        foreach (Auth::user()->followers()->get() as $follower) {
+            $notification = Notification::create([
+                'type' => 'posted',
+                'author_id' => Auth::id(),
+                'recipient_id' => $follower->id,
+                'notifiable_id' => $post->id,
+                'notifiable_type' => Post::class
+            ]);
+
+            broadcast(new NotificationCreated($notification))->toOthers();
+        }
 
         return response()->json([
             'message' => 'Post created succesfully.',

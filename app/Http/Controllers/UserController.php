@@ -43,6 +43,13 @@ class UserController extends Controller
                 ])
             :  $user;
 
+        if ($user->id !== Auth::id()) {
+            $currentUserId = Auth::id();
+
+            $data['is_followed'] = $user->isFollowedBy($currentUserId);
+            $data['pending'] = $user->hasPendingRequestFrom($currentUserId);
+        }
+
         return response()->json([
             'message' => 'Success.',
             'user' => $data

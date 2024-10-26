@@ -24,6 +24,11 @@ const routes = [
                 component: SearchPage
             },
             {
+                path: 'notifications',
+                name: 'Notifications',
+                component: () => import('@/pages/NotificationPage.vue')
+            },
+            {
                 path: '@:username',
                 component: UserProfilePage
             },

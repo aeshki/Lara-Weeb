@@ -32,20 +32,6 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = data;
     }
 
-    async function handleLogout() {
-        return await axios.get('/auth/logout').then(() => {
-            $reset();
-            this.router.push('/auth/login');
-        });
-    }
-
-    async function handleDeleteAccount() {
-        return await axios.delete(`/api/users/${user.value.id}`).then(() => {
-            $reset();
-            this.router.push('/auth/login');
-        });
-    }
-
     async function updateUser(data) {
         let formData = new FormData();
 
@@ -74,12 +60,18 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = null;
     }
 
+    function resetImages() {
+        user.value.avatar = null;
+        user.value.banner = null;
+    };
+
     return {
         user,
         getCSRFToken,
         isAuthenticate,
         setUser,
         updateUser,
+        resetImages,
         $reset
     }
 }, { persist: true });

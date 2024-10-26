@@ -43,7 +43,9 @@ class User extends Authenticatable
 
     protected $appends = [
         'flags',
-        'total_likes'
+        'total_likes',
+        'followers_count',
+        'following_count'
     ];
 
     protected function casts(): array
@@ -66,7 +68,23 @@ class User extends Authenticatable
 
     protected function getTotalLikesAttribute()
     {
-        return $this->posts()->withCount('likes')->get()->sum('likes_count');
+        return $this->posts()
+            ->where('visible', true)
+            ->withCount('likes')
+            ->get()
+            ->sum('likes_count');
+    }
+
+    protected function getFollowersCountAttribute()
+    {
+        return $this->followers()->count();
+
+    }
+
+    protected function getFollowingCountAttribute()
+    {
+        return $this->following()->count();
+
     }
 
     protected function getFlagsAttribute()
@@ -101,5 +119,35 @@ class User extends Authenticatable
     public function posts()
     {   
         return $this->hasMany(Post::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'recipient_id');
+    }
+
+    public function followerRequests()
+    {
+        return $this->hasMany(FollowRequest::class, 'followed_id');
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'followed_id', 'follower_id');
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'followed_id');
+    }
+
+    public function isFollowedBy($userId)
+    {
+        return $this->followers()->where('follower_id', $userId)->exists();
+    }
+
+    public function hasPendingRequestFrom($userId)
+    {
+        return $this->followerRequests()->where('follower_id', $userId)->exists();
     }
 }

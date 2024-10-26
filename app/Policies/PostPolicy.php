@@ -10,25 +10,29 @@ class PostPolicy
 {
     public function before(User $user): bool|null
     {
-        if ($user->is_super_admin) {
-            return true;
-        }
-     
-        return null;
+        return true;
+
+        // if ($user->is_super_admin) {
+        //     return true;
+        // }
+
+        // return null;
     }
 
     public function viewAny(User $user)
     {
-        return $user->is_super_admin
-            ? Response::allow()
-            : Response::denyAsNotFound();
+        return true;
+        // return $user->is_super_admin
+            // ? Response::allow()
+            // : Response::denyAsNotFound();
     }
 
     public function view(User $user, Post $model)
     {
-        return $model->author->is_private && $user->id !== $model->author->id
-            ? Response::denyAsNotFound()
-            : Response::allow();
+        return true;
+        // return $model->author->is_private && $user->id !== $model->author->id || !$model->visible
+        //     ? Response::denyAsNotFound()
+        //     : Response::allow();
     }
 
     public function update(User $user, Post $model)

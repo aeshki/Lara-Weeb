@@ -1,5 +1,27 @@
 <script setup>
 import Navbar from '@/components/layout/Navbar.vue';
+import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '@/stores/notification';
+import useAxios from '@/utils/useAxios';
+import { onMounted } from 'vue';
+
+const notificationStore = useNotificationStore();
+const authStore = useAuthStore();
+
+onMounted(() => {
+    if (authStore.isAuthenticate()) {
+        const { onFulfilled } = useAxios('/api/users/@me/notifications');
+
+        onFulfilled((data) => {
+            notificationStore.setNotifications(data.value.notifications);
+        });
+
+        Echo.private(`user.${authStore.user.id}.notifications`)
+            .listen('.notification.created', (notification) => {
+                notificationStore.addNotification(notification);
+            });
+    }
+});
 </script>
 
 <template>

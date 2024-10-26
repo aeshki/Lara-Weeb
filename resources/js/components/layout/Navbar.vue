@@ -1,27 +1,51 @@
 <script setup>
 import UserAvatar from '@/components/User/Avatar.vue';
 import NavButton from '@/components/common/buttons/NavButton.vue';
-import { Home, Search } from 'lucide-vue-next';
+import { Home, Search, Bell } from 'lucide-vue-next';
 
 import { useAuthStore } from '@/stores/auth';
+import { useNotificationStore } from '@/stores/notification';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
+const router = useRouter();
 
-const navItems = [
-    { title: 'Accueil', icon: Home, to: '/' },
-    { title: 'Recherche', icon: Search, to: '/search' },
-];
+const notificationStore = useNotificationStore();
+
+const handleRedirect = () => {
+    router.push('/notifications');
+}
 </script>
 
 <template>
     <aside class='p-4 bg-zinc-900 text-zinc-50 border-t border-neutral-600 sm:border-r sm:border-t-0'>
-        <nav class='flex sm:flex-col gap-4 justify-around items-center md:items-start'>
-            <div v-for="item in navItems" :key="item.to" class='md:w-full'>
+        <nav class='flex sm:flex-col gap-4 justify-around items-center md:items-start *:md:w-full'>
+            <div>
                 <NavButton
-                    :title="item.title"
-                    :icon="item.icon"
-                    :to="item.to"
+                    title='Accueil'
+                    :icon='Home'
+                    to='/'
                 />
+            </div>
+            <div>
+                <NavButton
+                    title="Recherche"
+                    :icon='Search'
+                    to='/search'
+                />
+            </div>
+            <div class='relative'>
+                <NavButton
+                    title="Notifications"
+                    :icon='Bell'
+                    to='/notifications'
+                />
+                <span
+                    v-if='notificationStore.unreadCount > 0'
+                    class='flex items-center justify-center absolute top-0 right-0 md:left-6 bg-rose-700 p-1 max-w-5 max-h-5 w-full h-full text-xs rounded-lg overflow-hidden'
+                    :class='{ "hidden": $route.name === "Notifications" }'
+                    @click='handleRedirect'
+                >{{ notificationStore.unreadCount }}</span>
             </div>
             <div>
                 <RouterLink

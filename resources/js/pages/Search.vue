@@ -15,7 +15,7 @@ import { onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import useAxios from '@/utils/useAxios';
 
-import { TextInput, DefaultButton } from '@/components/common';
+import { SearchInput, DefaultButton } from '@/components/common';
 import PostCard from '@/components/PostCard.vue';
 import SearchUserCard from '@/components/SearchUserCard.vue';
 
@@ -95,13 +95,10 @@ const postTagClicked = (tag) => {
 
 <template>
     <ul class='flex flex-col items-center gap-4 p-4'>
-        <TextInput
-            minlength='2'
+        <SearchInput
+            min-length='2'
             v-model='search'
-        />
-        <DefaultButton
-            text='Rechercher'
-            @click='handleClick'
+            @validate='handleClick()'
         />
         <template v-if='query.type === "tag"'>
             <PostCard
